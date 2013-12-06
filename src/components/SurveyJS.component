@@ -351,6 +351,12 @@
     	}
     });
     
+    // set some mobile defaults
+	$(document).on("mobileinit", function(){
+		$.mobile.activeBtnClass = 'unused';
+    	$.mobile.changePage.defaults.allowSamePageTransition = true;
+	});
+	
     var viewModel=null;
   </script>
 </apex:component>
