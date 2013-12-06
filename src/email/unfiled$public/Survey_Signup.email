@@ -1,0 +1,20 @@
+<messaging:emailTemplate subject="Please take our survey" recipientType="Contact" relatedToType="Survey_Response__c">
+<messaging:htmlEmailBody >
+<p>Dear {!relatedTo.Contact_Name__c}, </p>
+
+<p>Here is your survey URL: </p>
+
+<a href="{!relatedTo.External_App_Link__c}">{!relatedTo.External_App_Link__c}</a>
+
+<p>This URL is specific to you and should not be shared with anyone else. </p>
+
+<p>Or you can scan the code below:</p>
+<img src="http://api.qrserver.com/v1/create-qr-code/?data={!URLENCODE(relatedTo.External_App_Link__c)}" width="150" height="150"/>
+
+
+<p>Thanks again </p>
+
+<p>-- <br/><br/>
+
+Bob Buzzard</p></messaging:htmlEmailBody>
+</messaging:emailTemplate>

@@ -1,0 +1,30 @@
+<apex:page controller="CreateSurveyResponseController" tabstyle="Survey_Response__c">
+  <apex:form >
+    <apex:sectionHeader title="Surveys" subtitle="Create Response"/>
+    <apex:pageMessages />
+    <apex:pageBlock title="Create Survey Response" mode="maindetail">
+      <apex:pageBlockButtons >
+        <apex:commandButton value="Save" action="{!Save}" />
+        <apex:commandButton value="Cancel" action="{!URLFOR($Action.Survey__c.List, $ObjectType.Survey__c)}" immediate="true"/>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection title="Choose Survey">
+      <apex:pageBlockSectionItem >
+        <apex:outputLabel value="Survey"/>
+        <apex:actionRegion >
+          <apex:selectList value="{!surveyId}" multiselect="false" size="1">
+            <apex:selectOptions value="{!surveys}" />
+            <apex:actionSupport event="onchange" action="{!surveyChanged}" rerender="srv_desc" />
+          </apex:selectList>
+        </apex:actionRegion>
+      </apex:pageBlockSectionItem>
+      <apex:pageBlockSectionItem >
+        <apex:outputLabel value="Description"/>
+        <apex:outputText value="{!surveyDescription}" id="srv_desc"/>
+      </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+      <apex:pageBlockSection title="Choose Contact">
+        <apex:inputField value="{!rsp.Contact__c}" required="true" />
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

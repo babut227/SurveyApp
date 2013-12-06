@@ -1,0 +1,21 @@
+<apex:component >
+  <style>
+    /* Custom styles for the Dreamforce Survey application - resident 
+     * in a component to allow easy changing. Needs to be in a
+     * static resource to take advantage of browser caching
+     */
+      
+	.headerlogo
+	{
+	   	margin:5px;
+    	float: left; 
+		display: inline;
+		border-top-left-radius: 5px; 
+		border-top-right-radius: 5px;
+		border-bottom-left-radius: 5px;
+		border-bottom-right-radius: 5px;
+		height:26px;
+		width:38px;
+	}
+  </style>
+</apex:component>

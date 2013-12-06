@@ -1,0 +1,356 @@
+<apex:component >
+  <script>
+    /* 
+     * JavaScript for the Dreamforce Survey application - resident 
+     * in a component to allow easy changing. Needs to be in a
+     * static resource to take advantage of browser caching
+     */ 
+    
+    // Survey response object   
+	function SurveyResponse(id, description, complete, complete_date)
+    {
+    	var self=this;
+		self.id=id;
+		self.description=description;
+		self.complete=complete;
+		self.complete_date=complete_date;
+	}
+    
+    // Survey question response. Constructs a simple object with an empty list of options   	
+	function SurveyQuestionResponse()
+	{ 
+		var self=this.
+		self.options=ko.observableArray();
+	}
+      	
+	function SurveyQuestionResponse(id, text, type, index, response, option_1, option_2, option_3,
+     								option_4, option_5, option_6, option_7, option_8, option_9, option_10,
+   									help_text, survey_id)
+	{
+		var self=this;
+		self.id=id;
+		self.text=text;
+		self.type=type;
+		self.index=index;
+		self.response=ko.observable(response);
+		self.options=ko.observableArray();
+		self.checked=ko.observableArray();
+		
+		// helper function to add an option for a radio button or checkbox
+		self.addOption = function(option)
+		{
+			if (null!=option)
+			{
+				self.options().push(option);
+				if ( !(typeof self.response() === 'undefined') &&
+					  (self.response().indexOf(option)==-1) )
+				{
+					self.checked().push(false);
+				}
+				else
+				{
+      				self.checked().push(false);
+      			}
+      		}
+      	}
+      	
+		self.addOption(option_1);
+		self.addOption(option_2);
+		self.addOption(option_3);
+		self.addOption(option_4);
+		self.addOption(option_5);
+		self.addOption(option_6);
+		self.addOption(option_7);
+		self.addOption(option_8);
+		self.addOption(option_9);
+		self.addOption(option_10);
+		self.help=help_text;
+	}
+    
+    // the Knockout view model for the application
+      	
+	function SurveyViewModel()
+	{
+		var self=this;
+		
+		// initialise variables to default observables
+		self.survey_response=ko.observable(new SurveyResponse());
+		self.current_question=ko.observable(new SurveyQuestionResponse());
+		self.current_question_no=0;
+		self.questions=ko.observableArray();
+		
+		self.errorMsg=ko.observable('');
+		self.completeMsg=ko.observable('');
+		self.hasPrevious=ko.observable();
+		self.hasNext=ko.observable(false);
+		self.hasPrev=ko.observable(false);
+		self.selectVal=ko.observable('');
+        	
+		self.loadSurveyResponse=function()
+		{
+			// execute JavaScript remoting function
+			SurveyAppController.GetSurveyResponse('{!$CurrentPage.parameters.code}', self.responseCB, {escape: true}); 
+		}
+		
+		// callback for the JavaScript remoting call	
+		self.responseCB=function(record, event)
+		{
+			if ( (!event) || (event.status) ) 
+			{
+				// check if the user has already completed the survey
+				if (record.Complete__c)
+				{
+					self.completeMsg('You have already completed this survey.');
+					$.mobile.changePage('#completepage');
+				}
+				else
+				{
+					// create new JS response object
+					var resp=new SurveyResponse(record.Id, record.Description__c, 
+												record.Complete__c, record.Complete_Date__c);
+								
+					self.survey_response(resp);
+
+					// iterate the question responses and create observables
+					// uses an anonymous function as this could not possibly
+					// be used for any other purpose!
+					$.each(record.Survey_Question_Responses__r,
+							function()
+							{
+								var question=new ko.observable(new SurveyQuestionResponse(
+																this.Id, this.Question_Text__c, this.Question_Type__c, 
+																this.Index__c, this.Response__c, this.Option_1__c,
+																this.Option_2__c,this.Option_3__c,this.Option_4__c,
+																this.Option_5__c,this.Option_6__c,this.Option_7__c,
+																this.Option_8__c,this.Option_9__c,this.Option_10__c,
+																this.Help_Text__c, this.Survey_Response__c));
+
+								self.questions.push(question);
+								
+								// if the current question is empty, set it to this question 
+								if (typeof self.current_question().type === 'undefined')
+								{
+									self.current_question(question());
+								}
+							});
+
+					// setup whether to display the next button 							
+					if (self.questions().length>1)
+					{
+						self.hasNext(true);
+					}
+									
+					// add the input markup
+					self.addInput();
+						
+					// send the user to the starting page
+					$.mobile.changePage('#startpage');
+				}
+									
+				$.mobile.hidePageLoadingMsg();
+			}
+			else if (event.type === 'exception')
+			{
+				self.error(event.message);
+			}
+		}
+	
+		// function to display an error message	
+		self.error=function(msg)
+		{
+			self.errorMsg(msg);
+			$.mobile.changePage('#errorpage');
+		}
+			
+		// function executed when the user clicks the 'next' button
+		self.next=function()
+		{
+			$.mobile.loading( 'show', { theme: "a", text: "working", textVisible: true });
+
+			// advance to the next question
+    	    self.current_question_no++;
+	        self.current_question(self.questions()[self.current_question_no]());
+	        
+	        // setup previous/next buttons
+	        self.hasPrev(true);
+	        self.hasNext(self.current_question_no<self.questions().length-1);
+	        
+	        // add the input markup
+ 	        self.addInput();
+		    $.mobile.hidePageLoadingMsg();
+		}
+			
+		// function executed when the user clicks the 'prev' button - could refactor
+		// some of this and the next function into a common helper
+		self.prev=function()
+		{
+			$.mobile.loading( 'show', { theme: "a", text: "working", textVisible: true });
+			self.current_question_no--;
+			self.current_question(self.questions()[self.current_question_no]());
+			self.hasPrev(self.current_question_no!=0);
+			self.hasNext(true);
+			self.addInput();
+			$.mobile.hidePageLoadingMsg();
+		}
+			
+		// add the appropriate input markup
+ 		self.addInput=function()
+ 		{
+			if (self.current_question().type=='Radio Buttons')
+ 			{
+ 				self.addRadioInput();
+ 			}
+ 			else if (self.current_question().type=='Checkbox')
+ 			{
+ 				self.addCheckboxInput();
+ 			}
+ 			else if (self.current_question().type=='Text Area')
+ 			{
+ 				self.addTextAreaInput();
+ 			}
+ 		}
+ 			
+ 		// output the markup for a set of radio buttons
+ 		// have to delete and insert as JQM doesn't re-enhance updated DOM elements
+ 		self.addRadioInput=function()
+ 		{
+ 			$('#inputdiv').html(
+		  			'<div id="radio" data-bind="value: $root.current_question().response, visible: current_question().type==\'Radio Buttons\'">' +
+					'	<fieldset id="radiocontrol" data-role="controlgroup">' + 
+					'		<' +  // Visualforce will break the comment that encloses the containerless element, so split over two lines
+					'!-- ko foreach: current_question().options --> ' +
+		     		'		<input name="radio-options" type="radio" data-bind="value: $data, checked: $root.current_question().response, attr: {id:\'rb_\' + $index() }"></input> ' +
+					'		<label data-bind="attr:{for : \'rb_\' + $index() }, text: $data"></label> ' + 
+					'		<' + 
+					'!-- /ko --> ' +
+					'	</fieldset> ' +
+					'</div> ');
+				
+			// bind the new markup to the viewmodel
+			ko.applyBindings(viewModel, $('#radio')[0]);
+			
+			// trigger JQM to enhance the newly created radio button div
+			$('#radio').trigger('create');
+ 		}
+
+ 		// output the markup for one or more checkboxes
+ 		// have to delete and insert as JQM doesn't re-enhance updated DOM elements
+ 		self.addCheckboxInput=function()
+ 		{
+ 			$('#inputdiv').html(
+		  			'<div id="checkbox" data-bind="value: $root.current_question().response, visible: current_question().type==\'Checkbox\'">' +
+					'<fieldset data-role="controlgroup"> ' +
+					'		<' +  // Visualforce will break the comment that encloses the containerless element, so split over two lines
+					'!-- ko foreach: current_question().options --> ' +
+		  			'   <label> ' + 
+			  		'     <input type="checkbox" data-bind="value: $data, checked: $root.current_question().checked()[$index()], attr: {id: \'cb_\' + $index() }"></input> ' + 
+			  		'   <span data-bind="text: $data"/></label><' +
+					'!-- /ko --> ' +
+					'</fieldset> ' +
+					'</div> ');
+
+			// bind the viewmodel to the markup
+			ko.applyBindings(viewModel, $('#checkbox')[0]);
+			
+			// trigger JQM to enhance the newly created checkbox div
+			$('#checkbox').trigger('create');
+ 		}
+
+ 		// output the markup for a textarea
+ 		// have to delete and insert as JQM doesn't re-enhance updated DOM elements
+ 		self.addTextAreaInput=function()
+ 		{
+ 			$('#inputdiv').html(
+		  			'<div id="textarea" data-bind="visible: $root.current_question().type==\'Text Area\'">' +
+		  			'     <textarea data-bind="value: $root.current_question().response"/> ' + 
+					'</div> ');
+					
+			// bind the viewmodel to the markup
+			ko.applyBindings(viewModel, $('#textarea')[0]);
+			
+			// trigger JQM to enhance the newly created textarea div
+			$('#textarea').trigger('create');
+ 		}
+
+		// function executed when the user clicks the complete button
+		self.complete=function()
+		{
+			$.mobile.loading( 'show', { theme: "a", text: "completing", textVisible: true });
+			var resps=new Array();
+			// turn the JavaScript question responses into force.com equivalents
+			for (var idx=0; idx<self.questions().length; idx++)
+           	{
+           		var resp=new Survey_Question_Response__c();
+           		resp.Id=self.questions()[idx]().id;
+           		
+           		if (self.questions()[idx]().type=='Checkbox')
+           		{
+           			// find all of the checked elements and set the value into the response, separared by semicolons
+           			var qr='';
+           			for (var idx1=0; idx1<self.questions()[idx]().checked().length; idx1++)
+           			{	
+           				if (self.questions()[idx]().checked()[idx1])
+           				{
+           					qr+=';' + self.questions()[idx]().options()[idx1];
+           				}
+           			}
+           			if (qr.length>0)
+           			{
+           				qr=qr.substr(1);
+           			}
+           			resp.Response__c=qr;
+           		}
+           		else
+           		{
+           			resp.Response__c=self.questions()[idx]().response();
+           		}
+           		resps.push(resp);
+			}
+		
+			// execute JavaScript remoting method to save the response		
+			SurveyAppController.SaveSurveyResponse(resps, self.saveCB, {escape: true}); 
+		}
+		
+		// callback from the JavaScript remoting save call	
+		self.saveCB=function(result, event)
+		{
+			if ( (!event) || (event.status) ) 
+			{
+				self.completeMsg('Thank you for completing the survey.');
+				$.mobile.changePage('#completepage');
+			}
+			else if (event.type === 'exception')
+			{
+				self.error(event.message);
+			}
+			$.mobile.hidePageLoadingMsg();
+		}
+	
+		// kick off everything by loading the response from the server		
+		self.loadSurveyResponse();
+	}
+    
+    // JavaScript object matching Force.com definition for use when saving the response    
+	function Survey_Question_Response__c()
+	{
+		this.Id = null; 
+		this.Response__c = null;
+	}
+
+	// bind event onto the display of the 'loading' page - the first stacked div (logical page)
+	// this creates the viewmodel which handles the loading etc
+	$( "#loadingpage" ).on( "pageshow", function() {
+		$.mobile.defaultPageTransition = "slide"; 
+		if (null==viewModel)
+		{         
+			$.mobile.loading( 'show', { theme: "a", text: "loading survey", textVisible: true });
+		
+			viewModel=new SurveyViewModel();
+		
+    		ko.applyBindings(viewModel);
+    	}
+    });
+    
+    var viewModel=null;
+  </script>
+</apex:component>
