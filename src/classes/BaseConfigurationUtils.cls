@@ -26,11 +26,6 @@ global class BaseConfigurationUtils
 			result=bc.Site_Address__c;		
 		}
 		
-		if (null==result)
-		{
-			result=DEFAULT_SITE_ADDRESS;
-		}
-		
 		return result;
 	}
 }
