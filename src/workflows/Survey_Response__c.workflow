@@ -2,7 +2,7 @@
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <alerts>
         <fullName>Survey_Notification</fullName>
-        <ccEmails>keir.bowden@googlemail.com</ccEmails>
+        <ccEmails></ccEmails>
         <description>Survey Notification</description>
         <protected>false</protected>
         <recipients>
