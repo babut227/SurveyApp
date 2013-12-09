@@ -141,6 +141,28 @@
         <unique>false</unique>
     </fields>
     <fields>
+        <fullName>External_URL__c</fullName>
+        <externalId>false</externalId>
+        <formula>$Setup.Base_Configuration__c.Site_Address__c +  $Setup.Base_Configuration__c.SurveyLandingPage__c + &apos;?id=&apos; +  Id + &apos;&amp;code=&apos; +  Code__c</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>External URL</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Internal_URL__c</fullName>
+        <externalId>false</externalId>
+        <formula>$Setup.Base_Configuration__c.SurveyPage__c +&apos;?id=&apos; +  Id + &apos;&amp;code=&apos; +  Code__c</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Internal URL</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>Start_Date_Time__c</fullName>
         <externalId>false</externalId>
         <label>Start Date Time</label>
