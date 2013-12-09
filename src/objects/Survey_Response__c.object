@@ -30,7 +30,10 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>New</actionName>
-        <type>Default</type>
+        <comment>Visualforce override to create the survey response and instances of all required survey question responses.</comment>
+        <content>CreateSurveyResponse</content>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Visualforce</type>
     </actionOverrides>
     <actionOverrides>
         <actionName>SaveEdit</actionName>
@@ -135,28 +138,6 @@
         <formula>IMAGE(&apos;http://api.qrserver.com/v1/create-qr-code/?data=http%3A%2F%2F&apos; +  $Setup.Base_Configuration__c.Site_Address__c + &apos;%2FSurveyApp%3Fcode%3D&apos; + Code__c, &apos;QR Code&apos;)</formula>
         <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
         <label>External QR Code</label>
-        <required>false</required>
-        <trackTrending>false</trackTrending>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
-        <fullName>External_URL__c</fullName>
-        <externalId>false</externalId>
-        <formula>$Setup.Base_Configuration__c.Site_Address__c +  $Setup.Base_Configuration__c.SurveyLandingPage__c + &apos;?id=&apos; +  Id + &apos;&amp;code=&apos; +  Code__c</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>External URL</label>
-        <required>false</required>
-        <trackTrending>false</trackTrending>
-        <type>Text</type>
-        <unique>false</unique>
-    </fields>
-    <fields>
-        <fullName>Internal_URL__c</fullName>
-        <externalId>false</externalId>
-        <formula>$Setup.Base_Configuration__c.SurveyPage__c +&apos;?id=&apos; +  Id + &apos;&amp;code=&apos; +  Code__c</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Internal URL</label>
         <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Text</type>

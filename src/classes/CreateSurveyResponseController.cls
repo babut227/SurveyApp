@@ -6,6 +6,13 @@ public with sharing class CreateSurveyResponseController
 	private Map<Id, Survey__c> surveysById {get; set;}
 	public Survey_Response__c rsp {get; set;}
 	
+	// extension constructor - not used, but allows this page to override
+	// the new survey response behaviour
+	public CreateSurveyResponseController(ApexPages.StandardController stdCtrl)
+	{
+		this();
+	}
+	
 	public CreateSurveyResponseController()
 	{
 		surveys=new List<SelectOption>();
