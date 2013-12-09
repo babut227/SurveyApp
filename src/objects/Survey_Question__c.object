@@ -204,15 +204,7 @@
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>Picklist</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
                 <fullName>Radio Buttons</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>MultiCheckbox</fullName>
                 <default>false</default>
             </picklistValues>
             <sorted>false</sorted>
