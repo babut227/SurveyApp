@@ -28,7 +28,10 @@ Go to the public access settings for the site:
   Survey Name
 
 Create a Default Organization Level Value of the custom setting BaseConfiguration and add the address of the site 
-to it - exclude the leading scheme (http:// or https://) but remember to include the path if there is one.
+to it - exclude the leading scheme (http:// or https://) but remember to include the path if there is one - e.g. for
+the dev org I tested this on the site address field is:
+
+   df13bg-developer-edition.eu2.force.com/webinar
 
 Create a Survey and add a few survey questions. You'll need to fill in the option fields when using 
 radio buttons or checkboxes.
